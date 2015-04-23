@@ -22,11 +22,16 @@ foreach($terms as $term){
 	$termLinkHTML = makeSimpleHTMLDOM($termLink);
 	$subjects = $termLinkHTML->find(".collegePanel .odd a, .collegePanel .even a"); // second layer of links to courses
 
-	// for each term, get the subject
+	// for each term, get the college
+	
+
+	// for each college, get subject
+
+
 	$subjectLinks = array();
 	foreach($subjects as $subject){
 		$subjectLink = html_entity_decode($baseURL . $subject->href);
-		$subjectText = $subject->plaintext;
+		$subjectText = html_entity_decode($subject->plaintext);
 
 		// for each subject, get the courses
 		$subjectLinkHTML = makeSimpleHTMLDOM($subjectLink);
@@ -48,11 +53,11 @@ foreach($terms as $term){
 			
 			$subjectCode = $course->children(0)->plaintext;
 			$courseNumber = intval($course->children(1)->plaintext);
-			$instructionType = $course->children(2)->plaintext;
+			$instructionType = html_entity_decode($course->children(2)->plaintext);
 			$instructionMethod = $course->children(3)->plaintext;
 			$section = $course->children(4)->plaintext; // 061, 601, A, B, etc.
 			$crn = intval($course->children(5)->plaintext);
-			$courseTitle = $course->children(6)->plaintext;
+			$courseTitle = html_entity_decode($course->children(6)->plaintext);
 			$days = daysTableToArray($course->children(7));
 			$instructor = $course->children(8)->plaintext;
 
@@ -70,7 +75,11 @@ foreach($terms as $term){
 
 			array_push($coursesInfo, $courseInfo);
 		}
-		var_dump($coursesInfo);return;
+		/*$fp = fopen('results.json', 'w');
+		fwrite($fp, json_encode($coursesInfo, JSON_PRETTY_PRINT));
+		fclose($fp);
+		var_dump($coursesInfo);
+		return;*/
 
 		$subjectLinkArray = array(
 			"link" => $subjectLink,
@@ -79,7 +88,11 @@ foreach($terms as $term){
 		);
 		array_push($subjectLinks, $subjectLinkArray);
 	}
-	//var_dump($subjectLinks);return;
+	$fp = fopen('results.json', 'w');
+	fwrite($fp, json_encode($subjectLinks, JSON_PRETTY_PRINT));
+	fclose($fp);
+	var_dump($subjectLinks);
+	return;
 
 	$termLinkArray = array(
 		"link" => $termLink,
