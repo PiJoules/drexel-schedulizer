@@ -1,0 +1,11 @@
+application: drexelschedules
+version: 1
+runtime: php
+api_version: 1
+
+handlers:
+- url: /simple_html_dom.php
+  script: simple_html_dom.php
+
+- url: /.*
+  script: index.php
