@@ -72,7 +72,7 @@ fclose($fp);
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 		<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
-		<script type="text/javascript" src="handlebars-v3.0.1.js"></script>
+		<script type="text/javascript" src="js/handlebars-v3.0.1.js"></script>
 		<script id="entry-template" type="text/x-handlebars-template">
 			<table class="schedule{{num}} table table-bordered">
 			    <thead>
@@ -100,9 +100,9 @@ fclose($fp);
 			</table>
 		</script>
 
-		<script type="text/javascript" src="Schedule.js"></script>
-		<script type="text/javascript" src="SelectedCourses.js"></script>
-		<script type="text/javascript" src="scheduleCreate.js"></script>
+		<script type="text/javascript" src="js/Schedule.js"></script>
+		<script type="text/javascript" src="js/SelectedCourses.js"></script>
+		<script type="text/javascript" src="js/scheduleCreate.js"></script>
 		<script type="text/javascript">
 			var schedules = [Schedule()];
 

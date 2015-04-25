@@ -11,8 +11,9 @@ handlers:
 - url: /(.+\.php)$
   script: \1
 
-- url: /(.+\.js)$
-  script: \1
+- url: /js
+  mime_type: 'text/javascript'
+  static_dir: js
 
 - url: /.*
   script: index.php
