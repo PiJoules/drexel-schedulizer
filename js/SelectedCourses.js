@@ -29,23 +29,6 @@ var SelectedCourses = (function(){
 	};
 
 	var addCourse = function(crn, courseObj){
-		/*var days = courseObj["days"];
-		for (var i in days){
-			var dayTime = days[i];
-			var dayString = dayTime["day"];
-			var timeString = dayTime["time"];
-
-			if (isProperDayString(dayString) && isProperTimeString(timeString)){
-				var days = dayString.split(""); // M,T,W,R,F
-				var times = timeString.split(" - ");
-				var startTime = timeToInt(times[0]);
-				var endTime = timeToInt(times[1]);
-
-				days.forEach(function(day){
-					schedule.add(dayToInt(day), startTime, endTime, courseObj);
-				});
-			}
-		}*/
 		courses[crn] = courseObj;
 		return true;
 	};

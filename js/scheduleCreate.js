@@ -51,24 +51,6 @@ function schedulesFromSelectedCourses(selectedCourses){
 				else {
 					schedule.add(day, startTime, endTime, course);
 				}
-				/*
-						for (var i = 0; i < schedules.length; i++){
-							var overlappingCourses = SelectedCourses.getOverlappingCourses(responseCourse, schedules[i]);
-							if (Object.keys(overlappingCourses).length > 0){
-								for (var crn in overlappingCourses){
-									var copiedSchedule = schedules[i].clone();
-									copiedSchedule.remove(crn);
-									schedules.push(copiedSchedule);
-								}
-								removeDuplicateSchedules();
-								continue;
-							}
-							SelectedCourses.addCourse(responseCourse["crn"], responseCourse, schedules[i]);
-
-							resetSchedule(i);
-						}
-						resetTable();
-				 */
 			}
 		}
 	}

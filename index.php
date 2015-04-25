@@ -119,9 +119,6 @@ fclose($fp);
 			var template = Handlebars.compile(source);
 			$("#schedules-count").text(schedules.length);
 
-			/*for (var i = 0; i < schedules.length; i++){
-				resetSchedule(i);
-			}*/
 			resetSchedules();
 
 			$('#crn-search').keypress(function (e) {
@@ -152,22 +149,6 @@ fclose($fp);
 				if (crn !== "" && !SelectedCourses.containsCourse(crn)){
 					crn = parseInt(crn);
 					$.get("/get_course.php?crn=" + crn, function(responseCourse){
-						/*for (var i = 0; i < schedules.length; i++){
-							var overlappingCourses = SelectedCourses.getOverlappingCourses(responseCourse, schedules[i]);
-							if (Object.keys(overlappingCourses).length > 0){
-								for (var crn in overlappingCourses){
-									var copiedSchedule = schedules[i].clone();
-									copiedSchedule.remove(crn);
-									schedules.push(copiedSchedule);
-								}
-								removeDuplicateSchedules();
-								continue;
-							}
-							SelectedCourses.addCourse(responseCourse["crn"], responseCourse, schedules[i]);
-
-							resetSchedule(i);
-						}
-						resetTable();*/
 						SelectedCourses.addCourse(responseCourse["crn"], responseCourse);
 						schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
 						resetSchedules();
