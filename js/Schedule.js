@@ -75,13 +75,36 @@ var Schedule = function(initDailySchedule){
 
 	var getTableJSON = function(){
 		var prettyDailySchedule = [];
-		for (var i = 0; i < dailySchedule.length; i++){
-			var week = [numToTime(i)];
-			for (var j = 0; j < dailySchedule[i].length; j++){
-				week.push(dailySchedule[i][j]["courseTitle"]);
+		var first = 27, last = 0, breakOut = false;
+		for (var t = 0; t < dailySchedule.length && !breakOut; t++){
+			for (var d = 0; d < dailySchedule[t].length; d++){
+				if (dailySchedule[t][d]){
+					first = t;
+					breakOut = true;
+					break;
+				}
+			}
+		}
+
+		breakOut = false;
+		for (var t = dailySchedule.length-1; t >= 0 && !breakOut; t--){
+			for (var d = 0; d < dailySchedule[t].length; d++){
+				if (dailySchedule[t][d]){
+					last = t;
+					breakOut = true;
+					break;
+				}
+			}
+		}
+
+		for (var t = first; t <= last; t++){
+			var week = [numToTime(t)];
+			for (var d = 0; d < dailySchedule[t].length; d++){
+				week.push(dailySchedule[t][d]["courseTitle"]);
 			}
 			prettyDailySchedule.push(week);
 		}
+
 		return prettyDailySchedule;
 	};
 
