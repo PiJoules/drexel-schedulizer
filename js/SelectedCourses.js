@@ -28,8 +28,8 @@ var SelectedCourses = (function(){
 		return allOverlappingCourses;
 	};
 
-	var addCourse = function(crn, courseObj, schedule){
-		var days = courseObj["days"];
+	var addCourse = function(crn, courseObj){
+		/*var days = courseObj["days"];
 		for (var i in days){
 			var dayTime = days[i];
 			var dayString = dayTime["day"];
@@ -45,10 +45,13 @@ var SelectedCourses = (function(){
 					schedule.add(dayToInt(day), startTime, endTime, courseObj);
 				});
 			}
-		}
-
+		}*/
 		courses[crn] = courseObj;
 		return true;
+	};
+
+	var removeCourse = function(crn){
+		delete courses[crn];
 	};
 
 	var containsCourse = function(crn){
@@ -64,5 +67,6 @@ var SelectedCourses = (function(){
 		containsCourse: containsCourse,
 		getOverlappingCourses: getOverlappingCourses,
 		getCourses: getCourses,
+		removeCourse: removeCourse,
 	};
 })(); // courses already added to the list

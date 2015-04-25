@@ -46,6 +46,15 @@ fclose($fp);
 				</div>
 			</div>
 			<div class="row">
+				<label>CRN of class to remove</label>
+				<div id="crn-remove" class="input-group">
+					<input type="text" class="form-control" placeholder="Search for...">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button">Remove</button>
+					</span>
+				</div>
+			</div>
+			<div class="row">
 				<label>Selected</label>
 				<table class="table table-bordered">
 				    <thead>
@@ -74,7 +83,7 @@ fclose($fp);
 
 		<script type="text/javascript" src="js/handlebars-v3.0.1.js"></script>
 		<script id="entry-template" type="text/x-handlebars-template">
-			<table class="schedule{{num}} table table-bordered">
+			<table class="schedule schedule{{num}} table table-bordered">
 			    <thead>
 			        <tr>
 			        	<th></th>
@@ -110,9 +119,10 @@ fclose($fp);
 			var template = Handlebars.compile(source);
 			$("#schedules-count").text(schedules.length);
 
-			for (var i = 0; i < schedules.length; i++){
+			/*for (var i = 0; i < schedules.length; i++){
 				resetSchedule(i);
-			}
+			}*/
+			resetSchedules();
 
 			$('#crn-search').keypress(function (e) {
 				if (e.which == 13) {
@@ -125,12 +135,24 @@ fclose($fp);
 			$("#crn-search .btn").click(function(){
 				searchCRN();
 			});
+			$('#crn-remove').keypress(function (e) {
+				if (e.which == 13) {
+					removeCourse();
+
+					e.preventDefault();
+					return false;
+				}
+			});
+			$("#crn-remove .btn").click(function(){
+				removeCourse();
+			});
 
 			function searchCRN(){
 				var crn = $('#crn-search input').val().trim();
 				if (crn !== "" && !SelectedCourses.containsCourse(crn)){
+					crn = parseInt(crn);
 					$.get("/get_course.php?crn=" + crn, function(responseCourse){
-						for (var i = 0; i < schedules.length; i++){
+						/*for (var i = 0; i < schedules.length; i++){
 							var overlappingCourses = SelectedCourses.getOverlappingCourses(responseCourse, schedules[i]);
 							if (Object.keys(overlappingCourses).length > 0){
 								for (var crn in overlappingCourses){
@@ -143,36 +165,54 @@ fclose($fp);
 							}
 							SelectedCourses.addCourse(responseCourse["crn"], responseCourse, schedules[i]);
 
-							$("#courses-table").empty();
-							var courses = SelectedCourses.getCourses();
-							for (var crn in courses){
-								var course = courses[crn];
-								var row = $("<tr></tr>");
-								for(var key in course){
-									if (key === "days"){
-										var days = course[key];
-										var tr2 = $("<tr></tr>");
-										for(var key2 in days){
-											var day = days[key2]["day"];
-											var time = days[key2]["time"];
-											tr2.append($("<td style='width: 39%; text-align: center;'>" + day + "</td><td style='text-align: center;'>" + time + "</td>"));
-										}
-										var td = $("<td><table border='0'><tbody><tr>" + tr2.html() + "</tr></tbody></table></td>");
-
-										row.append(td);
-									}
-									else{
-										row.append("<td>" + course[key] + "</td>");
-									}
-								}
-								$("#courses-table").append(row);
-							}
-							$("#schedules-count").text(schedules.length);
-
 							resetSchedule(i);
 						}
+						resetTable();*/
+						SelectedCourses.addCourse(responseCourse["crn"], responseCourse);
+						schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
+						resetSchedules();
+						resetTable();
 					});
 				}
+			}
+
+			function removeCourse(){
+				var crn = $('#crn-remove input').val().trim();
+				if (crn !== ""){
+					crn = parseInt(crn);
+					SelectedCourses.removeCourse(crn);
+					schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
+					resetSchedules();
+					resetTable();
+				}
+			}
+
+			function resetTable(){
+				$("#courses-table").empty();
+				var courses = SelectedCourses.getCourses();
+				for (var crn in courses){
+					var course = courses[crn];
+					var row = $("<tr></tr>");
+					for(var key in course){
+						if (key === "days"){
+							var days = course[key];
+							var tr2 = $("<tr></tr>");
+							for(var key2 in days){
+								var day = days[key2]["day"];
+								var time = days[key2]["time"];
+								tr2.append($("<td style='width: 39%; text-align: center;'>" + day + "</td><td style='text-align: center;'>" + time + "</td>"));
+							}
+							var td = $("<td><table border='0'><tbody><tr>" + tr2.html() + "</tr></tbody></table></td>");
+
+							row.append(td);
+						}
+						else{
+							row.append("<td>" + course[key] + "</td>");
+						}
+					}
+					$("#courses-table").append(row);
+				}
+				$("#schedules-count").text(schedules.length);
 			}
 
 			function resetSchedule(i){
@@ -180,10 +220,26 @@ fclose($fp);
 					"num": i,
 					"weeks": schedules[i].getTableJSON()
 				});
-				if ($("#schedules .schedule" + i).length <= 0)
+				if ($("#schedules .schedule .schedule" + i).length <= 0)
 					$("#schedules").append(html);
 				else
-					$("#schedules .schedule" + i).replaceWith(html);
+					$("#schedules .schedule .schedule" + i).replaceWith(html);
+
+				if (schedules[i].isEmpty() && schedules.length > 1){
+					$("#schedules .schedule .schedule" + i).remove();
+					schedules.splice(i,1);
+				}
+			}
+
+			function resetSchedules(){
+				$("#schedules .schedule").remove();
+				for (var i = 0; i < schedules.length; i++){
+					var html = template({
+						"num": i,
+						"weeks": schedules[i].getTableJSON()
+					});
+					$("#schedules").append(html);
+				}
 			}
 
 			function dayToInt(day){

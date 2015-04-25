@@ -77,7 +77,6 @@ var Schedule = function(initDailySchedule){
 		var prettyDailySchedule = [];
 		for (var i = 0; i < dailySchedule.length; i++){
 			var week = [numToTime(i)];
-			//week = week.concat(dailySchedule[i]);
 			for (var j = 0; j < dailySchedule[i].length; j++){
 				week.push(dailySchedule[i][j]["courseTitle"]);
 			}
@@ -105,6 +104,17 @@ var Schedule = function(initDailySchedule){
 	var isEqual = function(schedule){
 		return JSON.stringify(dailySchedule) === JSON.stringify(schedule.getJSON());
 	};
+
+	var isEmpty = function(){
+		for (var time = 0; time < dailySchedule.length; time++){
+			for (var day = 0; day < dailySchedule[time].length; day++){
+				if (dailySchedule[time][day]){
+					return false;
+				}
+			}
+		}
+		return true;
+	};
 	
 	return {
 		add: add,
@@ -113,6 +123,7 @@ var Schedule = function(initDailySchedule){
 		getTableJSON: getTableJSON,
 		getOverlappingCourses: getOverlappingCourses,
 		clone: clone,
-		isEqual: isEqual
+		isEqual: isEqual,
+		isEmpty: isEmpty,
 	};
 };
