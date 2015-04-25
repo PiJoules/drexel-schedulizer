@@ -7,5 +7,12 @@ handlers:
 - url: /simple_html_dom.php
   script: simple_html_dom.php
 
+# serve php scripts
+- url: /(.+\.php)$
+  script: \1
+
+- url: /(.+\.js)$
+  script: \1
+
 - url: /.*
   script: index.php
