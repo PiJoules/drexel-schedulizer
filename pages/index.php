@@ -508,13 +508,14 @@ fclose($fp);
         <script type="text/javascript" src="../js/SelectedCourses.js"></script>
         <script type="text/javascript" src="../js/scheduleCreate.js"></script>
         <script type="text/javascript">
-            var schedules = [Schedule()];
+            var schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
 
             var source = $("#entry-template").html();
             var template = Handlebars.compile(source);
             $("#schedules-count").text(schedules.length);
 
             resetSchedules();
+            resetTable();
 
             $('#crn-search').keypress(function (e) {
                 if (e.which == 13) {

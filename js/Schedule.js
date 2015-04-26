@@ -100,7 +100,15 @@ var Schedule = function(initDailySchedule){
 		for (var t = first; t <= last; t++){
 			var week = [numToTime(t)];
 			for (var d = 0; d < dailySchedule[t].length; d++){
-				week.push(dailySchedule[t][d]["courseTitle"]);
+				var course = dailySchedule[t][d];
+				if (course){
+					var text = course["subjectCode"] + " " + course["courseNumber"];
+					week.push(text);
+				}
+				else {
+					week.push("");
+				}
+				//week.push(dailySchedule[t][d]["courseTitle"]);
 			}
 			prettyDailySchedule.push(week);
 		}

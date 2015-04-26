@@ -45,7 +45,6 @@ function schedulesFromSelectedCourses(selectedCourses){
 						copiedSchedule.remove(crn);
 						schedules.push(copiedSchedule);
 					}
-					removeDuplicateSchedules();
 					continue;
 				}
 				else {
@@ -53,6 +52,22 @@ function schedulesFromSelectedCourses(selectedCourses){
 				}
 			}
 		}
+
+		// remove duplicates
+        var temp = {};
+        var removeValFromIndex = [];
+        for (var i = 0; i < schedules.length; i++){
+            var json = JSON.stringify(schedules[i].getJSON());
+            if (json in temp){
+                removeValFromIndex.push(i);
+            }
+            else {
+                temp[json] = true;
+            }
+        }
+        for (var i = removeValFromIndex.length-1; i >= 0; i--){
+            schedules.splice(removeValFromIndex[i],1);
+        }
 	}
 
 	return schedules;

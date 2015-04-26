@@ -1,5 +1,14 @@
 var SelectedCourses = (function(){
+	var localstorageKey = "schedulizer-schedule";
+
 	var courses = {};
+	if (localStorage.getItem(localstorageKey) !== null){
+		var stored = JSON.parse(localStorage.getItem(localstorageKey));
+		for (var i in stored){
+			if (stored[i])
+				courses[i] = stored[i];
+		}
+	}
 
 	var getOverlappingCourses = function(courseObj, schedule){
 		var allOverlappingCourses = {};
@@ -30,11 +39,13 @@ var SelectedCourses = (function(){
 
 	var addCourse = function(crn, courseObj){
 		courses[crn] = courseObj;
+		localStorage.setItem(localstorageKey, JSON.stringify(courses));
 		return true;
 	};
 
 	var removeCourse = function(crn){
 		delete courses[crn];
+		localStorage.setItem(localstorageKey, JSON.stringify(courses));
 	};
 
 	var containsCourse = function(crn){
