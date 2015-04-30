@@ -1,23 +1,3 @@
-<?php
-
-header('Content-Type: text/html; charset=utf-8');
-
-ini_set('display_errors',1);
-ini_set('display_startup_errors',1);
-error_reporting(-1);
-
-$fp = fopen('../results.json', 'r');
-$quarters = json_decode(fread($fp, filesize("../results.json")), true);
-fclose($fp);
-
-// layers
-// 1 - quarters/semesters
-// 2 - colleges
-// 3 - subjects
-// 4 - courses
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,128 +47,13 @@ fclose($fp);
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-12">
-                            <h1 class="page-header">Add Classes</h1>
+                            <h1 class="page-header">All Possible Schedules (<span class="schedules-count">0</span>)</h1>
                         </div>
                         <!-- /.col-lg-12 -->
                     </div>
                     <!-- /.row -->
 
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">Find a Class</h3>
-                                </div>
-                                <div class="panel-body">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="form-group">
-                                                <label>Quarter/Semester</label>
-                                                <select id="quarter" class="form-control">
-                                                    <?php foreach ($quarters as $i => $quarter) { ?>
-                                                        <option <?php if ($i == 0) { ?>selected="selected"<?php } ?> ><?php echo $quarter["term"]; ?></option>
-                                                    <?php } ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="form-group">
-                                                <label>CRN of class to add</label>
-                                                <div id="crn-search" class="input-group">
-                                                    <input type="text" class="form-control" placeholder="Search for...">
-                                                    <span class="input-group-btn">
-                                                        <button class="btn btn-default" type="button">Add</button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="form-group">
-                                                <label>Name of class to add</label>
-                                                <div id="name-search" class="input-group">
-                                                    <input type="text" class="form-control" placeholder="Search for...">
-                                                    <span class="input-group-btn">
-                                                        <button class="btn btn-default" type="button">Add</button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">Remove a Class</h3>
-                                </div>
-                                <div class="panel-body">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="form-group">
-                                                <label>CRN of class to remove</label>
-                                                <div id="crn-remove" class="input-group">
-                                                    <input type="text" class="form-control" placeholder="Search for...">
-                                                    <span class="input-group-btn">
-                                                        <button class="btn btn-default" type="button">Remove</button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="btn-group">
-                                                <button id="remove-all" type="button" class="btn btn-default">Remove All Classes</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">Selected Courses</h3>
-                                </div>
-                                <div class="panel-body">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Subject Code</th>
-                                                <th>Course No.</th>
-                                                <th>Instr Type</th>
-                                                <th>Instr Method</th>
-                                                <th>Sec</th>
-                                                <th>CRN</th>
-                                                <th>Course Title</th>
-                                                <th>Days/Time</th>
-                                                <th>Instructor</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="courses-table"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">Possible Schedules (<span class="schedules-count">0</span>)</h3>
-                                </div>
-                                <div id="schedules" class="panel-body">
-                                </div>
-                            </div>
-                        </div>
+                    <div id="schedules" class="row">
                     </div>
 
 
@@ -203,7 +68,7 @@ fclose($fp);
         <script type="text/javascript" src="../js/handlebars-v3.0.1.js"></script>
         <script id="entry-template" type="text/x-handlebars-template">
             <div class="schedule col-lg-6">
-                <table class="schedule{{num}} table table-bordered table-striped">
+                <table class="schedule{{num}} table table-bordered">
                     <thead>
                         <tr>
                             <th></th>
@@ -246,8 +111,7 @@ fclose($fp);
         <script type="text/javascript" src="../js/SelectedCourses.js"></script>
         <script type="text/javascript" src="../js/scheduleCreate.js"></script>
         <script type="text/javascript">
-            var courses = SelectedCourses.getCourses();
-            var schedules = schedulesFromSelectedCourses(courses);
+            var schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
 
             var source = $("#entry-template").html();
             var template = Handlebars.compile(source);
@@ -277,15 +141,6 @@ fclose($fp);
             });
             $("#crn-remove .btn").click(function(){
                 removeCourse();
-            });
-            $("#remove-all").click(function(){
-                var courses = SelectedCourses.getCourses();
-                for (var crn in courses){
-                    SelectedCourses.removeCourse(crn);
-                }
-                schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
-                resetSchedules();
-                resetTable();
             });
 
             function searchCRN(){
@@ -325,7 +180,7 @@ fclose($fp);
                             for(var key2 in days){
                                 var day = days[key2]["day"];
                                 var time = days[key2]["time"];
-                                tr2.append($("<tr><td style='width: 39%; text-align: center;'>" + day + "</td><td style='text-align: center;'>" + time + "</td></tr>"));
+                                tr2.append($("<td style='width: 39%; text-align: center;'>" + day + "</td><td style='text-align: center;'>" + time + "</td>"));
                             }
                             var td = $("<td><table border='0'><tbody><tr>" + tr2.html() + "</tr></tbody></table></td>");
 
@@ -424,36 +279,6 @@ fclose($fp);
                 for (var i = removeValFromIndex.length-1; i >= 0; i--){
                     schedules.splice(removeValFromIndex[i],1);
                 }
-            }
-
-            /**
-             * Get and reformat all days and times into integers as reformattedDays
-             */
-            function reformattedDays(course){
-                var days = course["days"];
-                var reformattedDays = []; // {day (as int), startTime (int), endTime (int)}
-                for (var i in days){
-                    var dayTime = days[i];
-                    var dayString = dayTime["day"];
-                    var timeString = dayTime["time"];
-
-                    if (isProperDayString(dayString) && isProperTimeString(timeString)){
-                        var days2 = dayString.split(""); // M,T,W,R,F
-                        var times = timeString.split(" - ");
-                        var startTime = timeToInt(times[0]);
-                        var endTime = timeToInt(times[1]);
-
-                        for (var j = 0; j < days2.length; j++){
-                            var day = dayToInt(days2[j]);
-                            reformattedDays.push({
-                                "day": day,
-                                "startTime": startTime,
-                                "endTime": endTime,
-                            });
-                        }
-                    }
-                }
-                return reformattedDays;
             }
         </script>
 

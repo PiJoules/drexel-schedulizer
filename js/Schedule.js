@@ -24,22 +24,37 @@ var Schedule = function(initDailySchedule){
 		dailySchedule = initDailySchedule.slice(0);
 	}
 
-	// return object of all courses that share the same time slot with the given a time period
-	var getOverlappingCourses = function(day, startTime, endTime){
+	var getOverlappingCourses = function(course){
 		var overlappingCourses = {};
-		for (var t = startTime; t < endTime; t++){
-			var course = dailySchedule[t][day];
-			if (course){
-				overlappingCourses[course["crn"]] = course;
+		var days = reformattedDays(course);
+		console.log(days, course);
+
+		for (var i = 0; i < days.length; i++){
+			var day = days[i]["day"];
+			var startTime = days[i]["startTime"];
+			var endTime = days[i]["endTime"];
+
+			for (var t = startTime; t < endTime; t++){
+				var course = dailySchedule[t][day];
+				if (course){
+					overlappingCourses[course["crn"]] = course;
+				}
 			}
 		}
+
 		return overlappingCourses;
 	};
 
-	// accepts day as int from 0-4 and time as int from 0-27
-	var add = function(day, startTime, endTime, courseObj){
-		for (var t = startTime; t < endTime; t++){
-			dailySchedule[t][day] = courseObj;
+	var add = function(course){
+		var days = reformattedDays(course);
+		for (var i = 0; i < days.length; i++){
+			var day = days[i]["day"];
+			var startTime = days[i]["startTime"];
+			var endTime = days[i]["endTime"];
+
+			for (var t = startTime; t < endTime; t++){
+				dailySchedule[t][day] = course;
+			}
 		}
 	};
 
@@ -108,7 +123,6 @@ var Schedule = function(initDailySchedule){
 				else {
 					week.push("");
 				}
-				//week.push(dailySchedule[t][d]["courseTitle"]);
 			}
 			prettyDailySchedule.push(week);
 		}

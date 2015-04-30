@@ -63,7 +63,7 @@ foreach($terms as $term){
 				// I also catch nested tr tags with "odd" and "even" classes, the ones I want have 9 children that are td tags
 				if (count($course->children()) < 9)
 					continue;
-				
+
 				$subjectCode = $course->children(0)->plaintext;
 				$courseNumber = intval($course->children(1)->plaintext);
 				$instructionType = html_entity_decode($course->children(2)->plaintext);
@@ -73,6 +73,38 @@ foreach($terms as $term){
 				$courseTitle = html_entity_decode($course->children(6)->plaintext);
 				$days = daysTableToArray($course->children(7));
 				$instructor = $course->children(8)->plaintext;
+
+				// get specific info about the course
+				$crnLink = html_entity_decode($baseURL . $course->children(5)->find("a",0)->href);
+				$crnLinkHTML = makeSimpleHTMLDOM($crnLink);
+				$tables = $crnLinkHTML->find('table > tbody'); // 14 rows
+				$table = array();
+				foreach($tables as $key => $body){
+					$rows = $body->children();
+					if (count($rows) >= 14){
+						$table = $body;
+						break;
+					}
+					if ($key >= count($tables)-1){
+						return; // ran into some sort of error
+					}
+				}
+				$maxEnroll = trim($table->children(10)->find("td",1)->plaintext);
+				$enroll = trim($table->children(11)->find("td",1)->plaintext);
+				$credits = trim($table->children(4)->find("td",1)->plaintext);
+				$campus = trim($table->children(6)->find("td",1)->plaintext);
+				$sectionComments = trim($table->children(12)->find("td",1)->plaintext);
+
+				$details = array(
+					"link" => $crnLink,
+					"maxEnroll" => $maxEnroll,
+					"enroll" => $enroll,
+					"credits" => $credits,
+					"campus" => $campus,
+					"sectionComments" => $sectionComments
+				);
+				var_dump($details);
+				return;
 
 				$courseInfo = array(
 					"subjectCode" => $subjectCode,
@@ -84,6 +116,7 @@ foreach($terms as $term){
 					"courseTitle" => $courseTitle,
 					"days" => $days,
 					"instructor" => $instructor
+					//"details" => $details,
 				);
 
 				array_push($coursesInfo, $courseInfo);
