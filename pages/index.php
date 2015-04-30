@@ -108,11 +108,11 @@ fclose($fp);
                                     <div class="row">
                                         <div class="col-lg-12">
                                             <div class="form-group">
-                                                <label>Name of class to add</label>
+                                                <label>Name of class to find</label>
                                                 <div id="name-search" class="input-group">
                                                     <input type="text" class="form-control" placeholder="Search for...">
                                                     <span class="input-group-btn">
-                                                        <button class="btn btn-default" type="button">Add</button>
+                                                        <button class="btn btn-default" type="button">Search</button>
                                                     </span>
                                                 </div>
                                             </div>
@@ -200,6 +200,41 @@ fclose($fp);
         </div>
         <!-- /#wrapper -->
 
+
+        <div class="modal fade" id="available-courses">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Courses</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Subject Code</th>
+                                    <th>Course No.</th>
+                                    <th>Instr Type</th>
+                                    <th>Instr Method</th>
+                                    <th>Sec</th>
+                                    <th>CRN</th>
+                                    <th>Course Title</th>
+                                    <th>Days/Time</th>
+                                    <th>Instructor</th>
+                                    <th>Add</th>
+                                </tr>
+                            </thead>
+                            <tbody id="found-courses-table"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <script type="text/javascript" src="../js/handlebars-v3.0.1.js"></script>
         <script id="entry-template" type="text/x-handlebars-template">
             <div class="schedule col-lg-6">
@@ -267,6 +302,17 @@ fclose($fp);
             $("#crn-search .btn").click(function(){
                 searchCRN();
             });
+            $('#name-search').keypress(function (e) {
+                if (e.which == 13) {
+                    searchName();
+
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            $("#name-search .btn").click(function(){
+                searchName();
+            });
             $('#crn-remove').keypress(function (e) {
                 if (e.which == 13) {
                     removeCourse();
@@ -297,6 +343,55 @@ fclose($fp);
                         schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
                         resetSchedules();
                         resetTable();
+                    });
+                }
+            }
+
+            function searchName(){
+                var name = $('#name-search input').val().trim();
+                if (name !== ""){
+                    $.get("/search_name.php?name=" + encodeURIComponent(name), function(courses){
+                        if (Object.keys(courses).length > 0){
+                            $("#found-courses-table").empty();
+                            for (var crn in courses){
+                                var course = courses[crn];
+                                var row = $("<tr></tr>");
+                                for(var key in course){
+                                    if (key === "days"){
+                                        var days = course[key];
+                                        var tr2 = $("<tr></tr>");
+                                        for(var key2 in days){
+                                            var day = days[key2]["day"];
+                                            var time = days[key2]["time"];
+                                            tr2.append($("<tr><td style='width: 39%; text-align: center;'>" + day + "</td><td style='text-align: center;'>" + time + "</td></tr>"));
+                                        }
+                                        var td = $("<td><table border='0'><tbody><tr>" + tr2.html() + "</tr></tbody></table></td>");
+
+                                        row.append(td);
+                                    }
+                                    else{
+                                        row.append("<td>" + course[key] + "</td>");
+                                    }
+                                }
+                                var td = $("<td><button data-course='" + JSON.stringify(course) + "' type=\"button\" class=\"add-course btn btn-default\"><span class=\"glyphicon glyphicon-plus\"></span></button></td>");
+                                row.append(td);
+                                $("#found-courses-table").append(row);
+                            }
+
+                            $(".add-course").click(function(){
+                                var course = $(this).data("course");
+                                var crn = course["crn"];
+
+                                if (!SelectedCourses.containsCourse(crn)){
+                                    SelectedCourses.addCourse(crn, course);
+                                    schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
+                                    resetSchedules();
+                                    resetTable();
+                                }
+                            });
+
+                            $("#available-courses").modal();
+                        }
                     });
                 }
             }

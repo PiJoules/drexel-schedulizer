@@ -27,7 +27,6 @@ var Schedule = function(initDailySchedule){
 	var getOverlappingCourses = function(course){
 		var overlappingCourses = {};
 		var days = reformattedDays(course);
-		console.log(days, course);
 
 		for (var i = 0; i < days.length; i++){
 			var day = days[i]["day"];
