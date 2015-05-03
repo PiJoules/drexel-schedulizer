@@ -89,9 +89,9 @@ foreach($terms as $term){
 						return; // ran into some sort of error
 					}
 				}
-				$maxEnroll = trim($table->children(10)->find("td",1)->plaintext);
-				$enroll = trim($table->children(11)->find("td",1)->plaintext);
-				$credits = trim($table->children(4)->find("td",1)->plaintext);
+				$maxEnroll = intval(trim($table->children(10)->find("td",1)->plaintext));
+				$enroll = intval(trim($table->children(11)->find("td",1)->plaintext));
+				$credits = floatval(trim($table->children(4)->find("td",1)->plaintext));
 				$campus = trim($table->children(6)->find("td",1)->plaintext);
 				$sectionComments = trim($table->children(12)->find("td",1)->plaintext);
 
@@ -103,8 +103,8 @@ foreach($terms as $term){
 					"campus" => $campus,
 					"sectionComments" => $sectionComments
 				);
-				var_dump($details);
-				return;
+				//var_dump($details);
+				//return;
 
 				$courseInfo = array(
 					"subjectCode" => $subjectCode,
@@ -115,8 +115,8 @@ foreach($terms as $term){
 					"crn" => $crn,
 					"courseTitle" => $courseTitle,
 					"days" => $days,
-					"instructor" => $instructor
-					//"details" => $details,
+					"instructor" => $instructor,
+					"details" => $details,
 				);
 
 				array_push($coursesInfo, $courseInfo);

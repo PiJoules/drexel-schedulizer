@@ -17,6 +17,12 @@
         <!-- MetisMenu CSS -->
         <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
 
+        <!-- DataTables CSS -->
+        <link href="../bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet">
+
+        <!-- DataTables Responsive CSS -->
+        <link href="../bower_components/datatables-responsive/css/dataTables.responsive.css" rel="stylesheet">
+
         <!-- Custom CSS -->
         <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
 
@@ -31,7 +37,22 @@
         <![endif]-->
 
         <style type="text/css">
-
+            .sorting_asc:after {
+                content: "\f0de";
+                float: right;
+                font-family: fontawesome;
+            }
+            .sorting_desc:after {
+                content: "\f0dd";
+                float: right;
+                font-family: fontawesome;
+            }
+            .sorting:after {
+                content: "\f0dc";
+                float: right;
+                font-family: fontawesome;
+                color: rgba(50,50,50,.5);
+            }
         </style>
 
     </head>
@@ -53,21 +74,73 @@
                     </div>
                     <!-- /.row -->
 
-                    <div id="schedules" class="row">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="schedule-sort panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Sort by</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="btn-group">
+                                                <button type="button" class="credits btn btn-default sorting_desc"><span class="text">Most Credits</span>&nbsp;</button>
+                                                <button type="button" class="time btn btn-default sorting"><span class="text">Early Classes</span>&nbsp;</button>
+                                                <button type="button" class="breaks btn btn-default sorting"><span class="text">Fewest Breaks</span>&nbsp;</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="description panel-footer">Sort by the most or fewest credits that can be taken.</div>
+                            </div>
+                        </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="schedule-filter panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Filter by</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-lg-3">
+                                            <div class="credits form-group">
+                                                <label>Credits</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-btn">
+                                                        <button type="button" name="gt" class="type btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">&gt;</button>
+                                                        <ul class="dropdown-menu" role="menu">
+                                                            <li><a name="gt" href="javascript: void(0);">&gt;</a></li>
+                                                            <li><a name="lt" href="javascript: void(0);">&lt;</a></li>
+                                                            <li><a name="eq" href="javascript: void(0);">=</a></li>
+                                                            <li><a name="gteq" href="javascript: void(0);">&gt;=</a></li>
+                                                            <li><a name="lteq" href="javascript: void(0);">&lt;=</a></li>
+                                                        </ul>
+                                                    </div>
+                                                    <input type="number" class="num form-control" min="0" value="0">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div id="schedules" class="row"></div>
 
                 </div>
-                <!-- /.container-fluid -->
             </div>
-            <!-- /#page-wrapper -->
 
         </div>
-        <!-- /#wrapper -->
 
         <script type="text/javascript" src="../js/handlebars-v3.0.1.js"></script>
         <script id="entry-template" type="text/x-handlebars-template">
-            <div class="schedule col-lg-6">
+            <div class="schedule col-lg-12">
+                <h3>{{credits}} Credits</h3>
                 <table class="schedule{{num}} table table-bordered">
                     <thead>
                         <tr>
@@ -110,175 +183,165 @@
         <script type="text/javascript" src="../js/Schedule.js"></script>
         <script type="text/javascript" src="../js/SelectedCourses.js"></script>
         <script type="text/javascript" src="../js/scheduleCreate.js"></script>
+        <script type="text/javascript" src="../js/misc_functions.js"></script>
         <script type="text/javascript">
-            var schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
+            var courses = SelectedCourses.getCourses();
+            var schedules = schedulesFromSelectedCourses(courses);
+            var filteredSchedules = $.extend(true, [], schedules); // clone array (deep copy)
 
             var source = $("#entry-template").html();
             var template = Handlebars.compile(source);
-            $(".schedules-count").text(schedules.length);
 
-            resetSchedules();
-            resetTable();
+            resetSchedules2();
 
-            $('#crn-search').keypress(function (e) {
-                if (e.which == 13) {
-                    searchCRN();
+            $(".schedule-sort .btn").click(function(){
+                var desc;
 
-                    e.preventDefault();
-                    return false;
+                if ($(this).hasClass("sorting_desc")){
+                    $(this).toggleClass("sorting_desc sorting_asc");
+                    desc = false;
                 }
-            });
-            $("#crn-search .btn").click(function(){
-                searchCRN();
-            });
-            $('#crn-remove').keypress(function (e) {
-                if (e.which == 13) {
-                    removeCourse();
-
-                    e.preventDefault();
-                    return false;
+                else if ($(this).hasClass("sorting_asc")) {
+                    $(this).toggleClass("sorting_asc sorting_desc");
+                    desc = true;
                 }
-            });
-            $("#crn-remove .btn").click(function(){
-                removeCourse();
-            });
-
-            function searchCRN(){
-                var crn = $('#crn-search input').val().trim();
-                if (crn !== "" && !SelectedCourses.containsCourse(crn)){
-                    crn = parseInt(crn);
-                    $.get("/get_course.php?crn=" + crn, function(responseCourse){
-                        SelectedCourses.addCourse(responseCourse["crn"], responseCourse);
-                        schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
-                        resetSchedules();
-                        resetTable();
-                    });
-                }
-            }
-
-            function removeCourse(){
-                var crn = $('#crn-remove input').val().trim();
-                if (crn !== ""){
-                    crn = parseInt(crn);
-                    SelectedCourses.removeCourse(crn);
-                    schedules = schedulesFromSelectedCourses(SelectedCourses.getCourses());
-                    resetSchedules();
-                    resetTable();
-                }
-            }
-
-            function resetTable(){
-                $("#courses-table").empty();
-                var courses = SelectedCourses.getCourses();
-                for (var crn in courses){
-                    var course = courses[crn];
-                    var row = $("<tr></tr>");
-                    for(var key in course){
-                        if (key === "days"){
-                            var days = course[key];
-                            var tr2 = $("<tr></tr>");
-                            for(var key2 in days){
-                                var day = days[key2]["day"];
-                                var time = days[key2]["time"];
-                                tr2.append($("<td style='width: 39%; text-align: center;'>" + day + "</td><td style='text-align: center;'>" + time + "</td>"));
-                            }
-                            var td = $("<td><table border='0'><tbody><tr>" + tr2.html() + "</tr></tbody></table></td>");
-
-                            row.append(td);
-                        }
-                        else{
-                            row.append("<td>" + course[key] + "</td>");
-                        }
-                    }
-                    $("#courses-table").append(row);
-                }
-                $(".schedules-count").text(schedules.length);
-            }
-
-            function resetSchedule(i){
-                var html = template({
-                    "num": i,
-                    "weeks": schedules[i].getTableJSON()
-                });
-                if ($("#schedules .schedule .schedule" + i).length <= 0)
-                    $("#schedules").append(html);
-                else
-                    $("#schedules .schedule .schedule" + i).replaceWith(html);
-
-                if (schedules[i].isEmpty() && schedules.length > 1){
-                    $("#schedules .schedule .schedule" + i).remove();
-                    schedules.splice(i,1);
-                }
-            }
-
-            function resetSchedules(){
-                $("#schedules .schedule").remove();
-                for (var i = 0; i < schedules.length; i++){
-                    var html = template({
-                        "num": i,
-                        "weeks": schedules[i].getTableJSON()
-                    });
-                    $("#schedules").append(html);
-                }
-            }
-
-            function dayToInt(day){
-                switch (day){
-                    case "M": return 0;
-                    case "T": return 1;
-                    case "W": return 2;
-                    case "R": return 3;
-                    case "F": return 4;
-                }
-            }
-
-            // hours will range from 08(am)-10(pm) and min will either be 00,20,30,50 
-            function timeToInt(time){
-                var isPM = (time.indexOf("pm") > -1);
-                var hour = parseInt(time.substr(0,2));
-                if (isPM && hour !== 12)
-                    hour += 12;
-                hour = (hour-8)*2; // 8:00 am corrsponds to 0, 9:30 pm corresponds to 27
-                var min = parseInt(time.substr(3,2));
-
-                // round up to next val if either 20 or 30
-                // round up to next hour if 50
-                if (min === 20 || min === 30){
-                    hour++;
-                }
-                else if (min === 50){
-                    hour += 2;
+                else { // .sorting
+                    $(".schedule-sort .btn").removeClass("sorting_asc sorting_desc").addClass("sorting");
+                    $(this).toggleClass("sorting sorting_desc"); // make desc by default
+                    desc = true;
                 }
 
-                return hour;
-            }
-
-            function isProperDayString(dayString){
-                // the only valid characters
-                // other possible dayStrings are "TBD" and "Final"
-                return /^[MTWRF]+$/.test(dayString);
-            }
-
-            function isProperTimeString(timeString){
-                return /^\d{2}:\d{2} (am|pm) - \d{2}:\d{2} (am|pm)$/.test(timeString);
-            }
-
-            function removeDuplicateSchedules(){
-                var temp = {};
-                var removeValFromIndex = [];
-                for (var i = 0; i < schedules.length; i++){
-                    var schedule = schedules[i];
-                    var json = JSON.stringify(schedule.getJSON());
-                    if (json in temp){
-                        removeValFromIndex.push(i);
+                if ($(this).hasClass("credits")){
+                    if (desc){
+                        filteredSchedules.sort(function(a,b){
+                            return b.getTotalCredits()-a.getTotalCredits();
+                        });
+                        $(this).find(".text").text("Most Credits");
                     }
                     else {
-                        temp[json] = true;
+                        filteredSchedules.sort(function(a,b){
+                            return a.getTotalCredits()-b.getTotalCredits();
+                        });
+                        $(this).find(".text").text("Fewest Credits");
                     }
+                    $(this).find(".description").text("Sort by the most or fewest credits that can be taken.");
                 }
-                for (var i = removeValFromIndex.length-1; i >= 0; i--){
-                    schedules.splice(removeValFromIndex[i],1);
+                else if ($(this).hasClass("time")){
+                    if (desc){
+                        filteredSchedules.sort(function(a,b){
+                            return a.getStartingTime()-b.getStartingTime();
+                        });
+                        $(this).find(".text").text("Early Classes");
+                    }
+                    else {
+                        filteredSchedules.sort(function(a,b){
+                            return b.getStartingTime()-a.getStartingTime();
+                        });
+                        $(this).find(".text").text("Late Classes");
+                    }
+                    $(this).find(".description").text("Sort by classes that start early or late.");
                 }
+                else {
+                    if (desc){
+                        filteredSchedules.sort(function(a,b){
+                            return a.getTotalBreaks()-b.getTotalBreaks();
+                        });
+                        $(this).find(".text").text("Fewest Breaks");
+                    }
+                    else {
+                        filteredSchedules.sort(function(a,b){
+                            return b.getTotalBreaks()-a.getTotalBreaks();
+                        });
+                        $(this).find(".text").text("Most Breaks");
+                    }
+                    $(this).find(".description").text("Sort by shchedules with the most or fewest number of breaks in between classes");
+                }
+
+                resetSchedules2();
+            });
+
+            $('.schedule-filter .credits .num').keypress(function (e) {
+                if (e.which == 13) {
+                    applyFilters();
+
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            $(".schedule-filter .credits .dropdown-menu a").click(function(){
+                var type = $(this).attr("name");
+                var html = $(this).html();
+                $(".schedule-filter .credits .type").attr("name", type).html(html);
+            });
+
+            function resetSchedules2(){
+                $("#schedules").empty();
+                for (var i = 0; i < filteredSchedules.length; i++){
+                    var html = template({
+                        "credits": filteredSchedules[i].getTotalCredits(),
+                        "num": i,
+                        "weeks": filteredSchedules[i].getTableJSON()
+                    });
+                    $("#schedules").append(html);
+                }
+                $(".schedules-count").text(filteredSchedules.length);
+            }
+
+            function applyFilters(){
+                var credits = parseInt($('.schedule-filter .credits .num').val());
+                if (isNaN(credits)){
+                    return;
+                }
+
+                filteredSchedules = [];
+
+                // apply credits
+                var type = $(".schedule-filter .credits .type").attr("name");
+                switch (type){
+                    case "gt":
+                        for (var i = 0; i < schedules.length; i++){
+                            var schedule = schedules[i];
+                            if (schedule.getTotalCredits() > credits){
+                                filteredSchedules.push($.extend(true, {}, schedule));
+                            }
+                        }
+                        break;
+                    case "lt":
+                        for (var i = 0; i < schedules.length; i++){
+                            var schedule = schedules[i];
+                            if (schedule.getTotalCredits() < credits){
+                                filteredSchedules.push($.extend(true, {}, schedule));
+                            }
+                        }
+                        break;
+                    case "eq":
+                        for (var i = 0; i < schedules.length; i++){
+                            var schedule = schedules[i];
+                            if (schedule.getTotalCredits() == credits){
+                                filteredSchedules.push($.extend(true, {}, schedule));
+                            }
+                        }
+                        break;
+                    case "gteq":
+                        for (var i = 0; i < schedules.length; i++){
+                            var schedule = schedules[i];
+                            if (schedule.getTotalCredits() >= credits){
+                                filteredSchedules.push($.extend(true, {}, schedule));
+                            }
+                        }
+                        break;
+                    case "lteq":
+                        for (var i = 0; i < schedules.length; i++){
+                            var schedule = schedules[i];
+                            if (schedule.getTotalCredits() <= credits){
+                                filteredSchedules.push($.extend(true, {}, schedule));
+                            }
+                        }
+                        break;
+                }
+
+                resetSchedules2();
             }
         </script>
 
